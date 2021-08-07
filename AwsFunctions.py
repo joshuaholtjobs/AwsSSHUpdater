@@ -1,7 +1,10 @@
-def add_rule():
+from requests import get
+		
+def add_rule(security_group):
 	try:
-		NEW_IP = get('https://api.ipify.org').text + "/32"
+		NEW_IP = get('https://checkip.amazonaws.com/').text.strip() + "/32"
 		response = security_group.authorize_ingress(IpProtocol = "TCP", CidrIp = NEW_IP, FromPort = 22, ToPort = 22)
+		print("\nRule Updated")
 	except:
 		print("\nThis rule is already in the Security Group")
 
