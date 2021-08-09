@@ -8,43 +8,31 @@ import pprint
 ec2 = boto3.resource('ec2')
 client= boto3.client('ec2')
 
-#Describes ec2 instance information and adds security groups to list
-#Response contains dict of key-value pairs
-response = client.describe_instances()
-groups = []
-for r in response["Reservations"]:
-	for instance in r["Instances"]:
-		for security_groups_temp in instance["SecurityGroups"]:
-			groups.append(security_groups_temp)
+#Stores security groups into a variable
+response = client.describe_security_groups()
 
-#pprint.pprint(response)
-#response =str(response)
-#parse = json.loads(response)
-#print(json.dumps(parse, indent=4, sort_keys=True))
-
-
-
-
-#Makes a list of groups for user to select from
+#Prints a numbered list for user to choose a group from
 i = 0
-for grp in groups:
-	print(str(i) + ". " + grp['GroupName'])
+for group in response["SecurityGroups"]:
+	print(str(i) + ". " + group['GroupName'])
 	i += 1
-select_group = input("Which security group did you want to update? ")
 
-#Error checks user input
+#Takes user's choice
+select_group = input("Which security group did you want to update? (Use corresponding number): ")
+
+#Makes sure input is a integer
 try:
 	select_group = int(select_group)
 except:
-	print("Needs to just be a number, re-run the script")
+	print("Needs to just be a valid number, re-run the script")
 	sys.exit()
 
-for r in response["Reservations"]:
-	for instance in r["Instances"]:
-		id = instance["SecurityGroups"][int(select_group)]["GroupId"]
+id = response["SecurityGroups"][int(select_group)]["GroupId"]
+print("")
+print(response["SecurityGroups"][int(select_group)]["GroupName"])
 security_group = ec2.SecurityGroup(id)
 
-Update_Rule = input("Are you sure you want to update the Security Group with your current IP? Type, \"Yes\" to update the Security Group: \n")
+Update_Rule = input("Are you sure you want to update the Security Group with your current IP? Type \"Yes\" to update the Security Group: \n")
 
 if Update_Rule == "Yes":
 	add_rule(security_group)
