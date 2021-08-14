@@ -1,14 +1,14 @@
-from botocore.exceptions import ClientError
+import pprint
 import boto3
 import sys
-from AwsFunctions import add_rule, remove_old_rule
-import pprint
+from AwsFunctions import add_current_location, remove_old_rule
+from botocore.exceptions import ClientError
 
 #Creates a connection to ec2 & client
 ec2 = boto3.resource('ec2')
 client= boto3.client('ec2')
 
-#Stores security groups into a variable
+#Stores all security groups found into a variable
 response = client.describe_security_groups()
 
 #Prints a numbered list for user to choose a group from
@@ -38,7 +38,12 @@ security_group = ec2.SecurityGroup(id)
 
 #Describes rules for selected instance
 response = client.describe_security_groups(GroupIds=[id])
-pprint.pprint(response)
+
+#Pretty prints json response, used for editing code)
+#pprint.pprint(response)
+
+#Loops through user-selected security group and prints all the inbound
+#and outbound rules. (Is there a better way to do this?)
 for i in response['SecurityGroups']:
 	print("---------------")
 	print("Security Group Name: "+i['GroupName'])
@@ -67,25 +72,26 @@ for i in response['SecurityGroups']:
 					print("")
 				except:
 					print("No Description")
+					print("---------------")
+					print("")
 		except Exception:
 			print("No value for ports, ip ranges, and/or description available for this security group")
+			print("---------------")
 			print("")
 			continue
 
+print("Would you like to:")
+print("1. Add current IP as an SSH rule to access attached servers")
+print("2. Manually add a rule (Not functional yet)")
+print("3. Delete a Rule (Not functional yet)")
+print("")
+Selection = input("Enter a number: ")
 
-
-'''
-#SecurityGroupRuleIds wants list datatype, list of security group rule IDS?
-response = client.describe_security_group_rules(SecurityGroupRuleIds=)
-
-pprint.pprint(response)
-
-security_group = ec2.SecurityGroup(id)
-
-Update_Rule = input("Are you sure you want to update the Security Group with your current IP? Type \"Yes\" to update the Security Group: \n")
-
-if Update_Rule == "Yes":
+if Selection == "1":
 	add_current_location(security_group)
+elif Selection == "2":
+	print("Not Functional Yet")
+elif Selection == "3":
+	print("Not Functional Yet")
 else:
-	print("Nothing was changed")
-'''
+	print("No valid option selected, re-run script")
